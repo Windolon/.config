@@ -1,3 +1,5 @@
 if status is-interactive
-    # Commands to run in interactive sessions can go here
+    fish_add_path $HOME/.local/bin $HOME/bin
+    set -gx EDITOR nvim
+    fish_config theme choose "kanagawa_dragon"
 end
