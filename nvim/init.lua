@@ -1,308 +1,244 @@
--- This is it. One file to rule them all.
+-- marco pierre white does not mind his lamb chops being well done.
+-- i dont mind my config having plugins.
+--
+-- i want things to look good, be easy to configure and to maintain, and
+-- be unobtrusive and show up only when i mean them to.
+-- each plugin and option has their place here.
 
--- {{{ options
--- reenable if any plugins are written in these languages
+-- {{{ general options, :h 'optionname'
+-- sir, the npm pack- NO.
 vim.g.loaded_node_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
 
+-- feel good options.
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.cursorline = true
 vim.opt.scrolloff = 10
-vim.opt.sidescrolloff = 8
-vim.opt.wrap = false
-vim.opt.spelllang = { "en", "de" }
-
-vim.opt.tabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.softtabstop = 4
-
-vim.opt.ignorecase = true
--- \Cquery to force case-sensitive search regardless
-vim.opt.smartcase = true
-
-vim.opt.termguicolors = true
-vim.opt.signcolumn = "yes"
-vim.opt.showmode = false
-
-vim.opt.diffopt:append("vertical")
-vim.opt.diffopt:append("algorithm:patience")
-vim.opt.diffopt:append("linematch:60")
-
-vim.opt.swapfile = false
-
-vim.opt.undofile = true
-local undodir = "~/.local/share/nvim/undodir"
-vim.opt.undodir = vim.fn.expand(undodir)
-local undodir_path = vim.fn.expand(undodir)
-if vim.fn.isdirectory(undodir_path) == 0 then
-	vim.fn.mkdir(undodir_path, "p")
-end
-
-vim.opt.path:append("**")
-vim.opt.mouse = "a"
-vim.opt.clipboard:append("unnamedplus")
-vim.opt.wildmode = "longest:full,full"
-vim.opt.wildignorecase = true
-
-vim.opt.guicursor = {
-	"n-v-c-sm:block",
-	"i-ci-ve:ver25",
-	"r-cr-o:hor20",
-	"t:block-blinkon0-TermCursor",
-	"a:blinkon0-Cursor/lCursor",
-}
-
+vim.opt.sidescrolloff = 30
+vim.opt.showmode = false -- statusline takes care of this
+vim.opt.breakindent = true
 vim.opt.splitbelow = true
 vim.opt.splitright = true
-
 vim.opt.confirm = true
-
 vim.opt.winborder = "rounded"
-
 vim.lsp.inlay_hint.enable(true)
+vim.opt.updatetime = 250
+
+-- :h spell
+vim.opt.spelllang = { "en", "de" }
+
+-- im just used to this search behaviour, shrug
+vim.opt.ignorecase = true
+vim.opt.smartcase = true -- \Cquery to force case-sensitive search regardless
+
+-- needed for a bunch of plugins, also gives padding to the left which looks nice
+vim.opt.signcolumn = "yes"
+
+-- persistent undos
+vim.opt.undofile = true
+
+-- sync os' and nvim's clipboard
+-- schedule this to reduce startup time impact
+vim.schedule(function()
+	vim.o.clipboard = "unnamedplus"
+end)
+
+-- guess-indent probably takes care of this but its still good to have some defaults (wtf is with 8?)
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 0
+vim.opt.expandtab = true
+
+vim.opt.pumheight = 10
+
+vim.g.netrw_banner = 0
+
+-- recommended by auto-session
+vim.opt.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+
+vim.diagnostic.config({
+	signs = {
+		text = {
+			-- yes.
+			[vim.diagnostic.severity.ERROR] = "■ ",
+			[vim.diagnostic.severity.WARN] = "■ ",
+			[vim.diagnostic.severity.INFO] = "■ ",
+			[vim.diagnostic.severity.HINT] = "■ ",
+		},
+	},
+	-- underline is true by default
+	virtual_text = true,
+})
 -- }}}
 
 -- {{{ native keymaps
 vim.g.mapleader = " "
--- is "[" on us/uk keyboards
 vim.g.maplocalleader = "ü"
 
--- :help index to see default mappings
-vim.keymap.set("n", "<leader>rc", "<Cmd>e $MYVIMRC<CR>", { desc = "Edit nvim[rc]" })
-vim.keymap.set("n", "<leader>rr", "<Cmd>restart<CR>", { desc = "Restart Neovim" })
-vim.keymap.set("n", "<leader>ru", "<Cmd>lua vim.pack.update()<CR>", { desc = "Update all plugins" })
+-- :h index to see default mappings
 
-vim.keymap.set("n", "n", "nzzzv", { desc = "Next search result (centered)" })
-vim.keymap.set("n", "N", "Nzzzv", { desc = "Previous search result (centered)" })
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Half page up (centered)" })
+vim.keymap.set("n", "<leader>ni", "<Cmd>e $MYVIMRC<CR>", { desc = "Edit init.lua" })
+vim.keymap.set("n", "<leader>nr", "<Cmd>restart<CR>", { desc = ":restart" })
+vim.keymap.set("n", "<leader>nu", vim.pack.update, { desc = "Update all plugins" })
 
--- default functionalities for H and L really suck and i wont use them
-vim.keymap.set("n", "<S-h>", "<Cmd>bprevious<CR>", { desc = "Previous buffer" })
-vim.keymap.set("n", "<S-l>", "<Cmd>bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<Esc>", "<Cmd>noh<CR>", { desc = "Turn off highlighting until the next search" })
 
--- <C-Left> and <C-Right> are aliases for b and w originally (i dont use them)
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Return to Nt mode" })
+
+-- <C-Left> and <C-Right> are aliases for B and W originally (i dont use them)
 vim.keymap.set("n", "<C-Up>", "<Cmd>resize +2<CR>", { desc = "Increase window height" })
 vim.keymap.set("n", "<C-Down>", "<Cmd>resize -2<CR>", { desc = "Decrease window height" })
 vim.keymap.set("n", "<C-Left>", "<Cmd>vertical resize -2<CR>", { desc = "Decrease window width" })
 vim.keymap.set("n", "<C-Right>", "<Cmd>vertical resize +2<CR>", { desc = "Increase window width" })
 
+-- default keymaps with improved behaviour
+vim.keymap.set("n", "n", "nzzzv", { desc = "Next search result (centered)" })
+vim.keymap.set("n", "N", "Nzzzv", { desc = "Previous search result (centered)" })
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Half page up (centered)" })
+vim.keymap.set("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
 vim.keymap.set("v", "<", "<gv", { desc = "Indent left and reselect" })
 vim.keymap.set("v", ">", ">gv", { desc = "Indent right and reselect" })
-
-vim.keymap.set("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
-
-vim.keymap.set("n", "<leader>bd", "<Cmd>bd<CR>", { desc = "Close buffer" })
-
-vim.keymap.set("n", "<Esc>", "<Cmd>noh<CR>", { desc = "Turns off highlighting until the next search" })
-
-vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 -- }}}
 
--- {{{ plugins
--- {{{ plenary.nvim
+-- {{{ essential plugins
+-- {{{ kanagawa.nvim:                        colour theme
 vim.pack.add({
-	{ src = "https://github.com/nvim-lua/plenary.nvim" },
+	{ src = "https://github.com/rebelot/kanagawa.nvim" },
 })
+require("kanagawa").setup({
+	-- Remove the background of LineNr, {Sign,Fold}Column and friends
+	colors = {
+		theme = {
+			all = {
+				ui = {
+					bg_gutter = "none",
+				},
+			},
+		},
+	},
+	-- More uniform colors for the popup menu
+	overrides = function(colors)
+		local theme = colors.theme
+		return {
+			Pmenu = { fg = theme.ui.fg, bg = theme.ui.float.bg }, -- add `blend = vim.o.pumblend` to enable transparency
+			PmenuSel = { fg = "NONE", bg = theme.ui.bg_p2 },
+			PmenuSbar = { bg = theme.ui.bg_m1 },
+			PmenuThumb = { bg = theme.ui.special },
+			PmenuKind = { bg = theme.ui.float.bg },
+			PmenuKindSel = { fg = "NONE", bg = theme.ui.bg_p2 },
+			PmenuExtra = { bg = theme.ui.float.bg },
+			PmenuExtraSel = { fg = "NONE", bg = theme.ui.bg_p2 },
+			BlinkCmpMenuBorder = { fg = theme.ui.float.fg_border, bg = "" }, -- why isnt this linked to Pmenu hlgroups
+		}
+	end,
+})
+vim.cmd.colorscheme("kanagawa-dragon")
 -- }}}
--- {{{ promise-async
+-- {{{ heirline.nvim:                        statusline framework
+require("plugins.heirline")
+-- }}}
+-- {{{ mini.nvim:                            library of improvement plugins
+-- woah, are you just downloading a bunch of shit 80% of which you dont use??
+-- "i dont mind my lamb chops being well done."
 vim.pack.add({
-	{ src = "https://github.com/kevinhwang91/promise-async" },
+	{ src = "https://github.com/nvim-mini/mini.nvim" },
 })
--- }}}
 
--- {{{ nord.nvim
-vim.pack.add({
-	{ src = "https://github.com/gbprod/nord.nvim" },
-})
-require("nord").setup({})
-vim.cmd.colorscheme("nord")
--- }}}
--- {{{ mini.icons
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.icons" },
-})
+-- icon provider
 require("mini.icons").setup()
 MiniIcons.mock_nvim_web_devicons()
--- }}}
--- {{{ lualine.nvim <- mini.icons | nord.nvim
-vim.pack.add({
-	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
-})
-require("lualine").setup({
-	sections = {
-		lualine_a = {
-			{
-				"mode",
-				color = { gui = "bold" },
-			},
-		},
-		lualine_z = {
-			{
-				"location",
-				color = { gui = "bold" },
-			},
-		},
-		lualine_x = {
-			{
-				"lsp_status",
-				ignore_lsp = { "efm" },
-			},
-			{ "filetype" },
-		},
+
+-- file explorer
+-- this is awesome. i cant live without this.
+require("mini.files").setup()
+vim.keymap.set("n", "<leader>e", MiniFiles.open, { desc = "Open mini.files explorer" })
+
+-- extend and create [a]round/[i]nside textobjects
+-- have been using this plugin's features without even realising.
+require("mini.ai").setup()
+
+-- surround actions
+-- same with mini.ai: been using the features for granted.
+require("mini.surround").setup()
+
+-- snippets engine
+-- also provides extensibility, such as custom snippets. need that.
+local gen_loader = require("mini.snippets").gen_loader
+require("mini.snippets").setup({
+	snippets = {
+		-- Load custom file with global snippets first (adjust for Windows)
+		gen_loader.from_file("~/.config/nvim/snippets/global.json"),
+
+		-- Load snippets based on current language by reading files from
+		-- "snippets/" subdirectories from 'runtimepath' directories.
+		gen_loader.from_lang(),
 	},
 })
--- }}}
--- {{{ bufferline.nvim <- mini.icons | nord.nvim
-vim.pack.add({
-	{
-		src = "https://github.com/akinsho/bufferline.nvim",
-		version = "v4.9.1",
-	},
-})
-vim.opt.termguicolors = true
-require("bufferline").setup({
-	options = {
-		separator_style = "thin",
-	},
-	highlights = require("nord.plugins.bufferline").akinsho(),
-})
--- }}}
--- {{{ mini.cursorword
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.cursorword" },
-})
-require("mini.cursorword").setup()
--- }}}
--- {{{ indent-blankline.nvim
-vim.pack.add({
-	{ src = "https://github.com/lukas-reineke/indent-blankline.nvim" },
-})
-require("ibl").setup()
--- }}}
--- {{{ mini.notify
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.notify" },
-})
+
+-- notifications
+-- turns out its good to know what is happening around you.
 require("mini.notify").setup()
--- }}}
--- {{{ mini.trailspace
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.trailspace" },
+
+-- move selections around
+require("mini.move").setup()
+
+-- highlights word under cursor
+require("mini.cursorword").setup()
+
+-- indent guide
+require("mini.indentscope").setup({
+	symbol = "│",
 })
-require("mini.trailspace").setup()
+vim.api.nvim_create_autocmd("FileType", {
+	callback = function(args)
+		local ft = vim.bo[args.buf].filetype
+		if ft == "help" then
+			vim.b[args.buf].miniindentscope_disable = true
+		end
+	end,
+})
 -- }}}
--- {{{ guess-indent.nvim
+-- {{{ fzf-lua:                              fuzzy finder
+-- this is very powerful.
+vim.pack.add({
+	{ src = "https://github.com/ibhagwan/fzf-lua" },
+})
+require("fzf-lua").setup()
+vim.keymap.set("n", "<leader>ff", '<Cmd>lua require("fzf-lua").files()<CR>', { desc = "Fuzzy find files" })
+vim.keymap.set("n", "<leader>fg", '<Cmd>lua require("fzf-lua").live_grep()<CR>', { desc = "Live grep" })
+vim.keymap.set("n", "<leader>fb", '<Cmd>lua require("fzf-lua").buffers()<CR>', { desc = "Fuzzy find open buffers" })
+vim.keymap.set("n", "<leader>fh", '<Cmd>lua require("fzf-lua").help_tags()<CR>', { desc = "Fuzzy find help tags" })
+-- }}}
+-- {{{ guess-indent.nvim:                    indentation styles inferred from individual buffers
 vim.pack.add({
 	{ src = "https://github.com/NMAC427/guess-indent.nvim" },
 })
 require("guess-indent").setup({})
 -- }}}
-
--- {{{ mini.ai
+-- {{{ nvim-ufo <- promise-async:            better folding behaviours
+-- i am a folder. you heard it here first. i need nvim-ufo.
+-- also, nvim-ufo makes folds prettier and more... minimalistic.
 vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.ai" },
+	{ src = "https://github.com/kevinhwang91/promise-async" },
+	{ src = "https://github.com/kevinhwang91/nvim-ufo" },
 })
-require("mini.ai").setup()
+vim.o.foldcolumn = "1"
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:"
+vim.keymap.set("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
+vim.keymap.set("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
+require("ufo").setup()
 -- }}}
--- {{{ mini.move
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.move" },
-})
-require("mini.move").setup()
--- }}}
--- {{{ mini.pairs
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.pairs" },
-})
-require("mini.pairs").setup({
-	mappings = {
-		[">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
-	},
-})
--- }}}
--- {{{ mini.surround
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.surround" },
-})
-require("mini.surround").setup()
--- }}}
-
--- {{{ mini.files
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.files" },
-})
-require("mini.files").setup()
-vim.keymap.set("n", "<leader>e", "<Cmd>lua MiniFiles.open()<CR>", { desc = "Open mini.files explorer" })
--- }}}
--- {{{ fzf-lua <- mini.icons
-vim.pack.add({
-	{ src = "https://github.com/ibhagwan/fzf-lua" },
-})
-require("fzf-lua").setup({})
-vim.keymap.set("n", "<leader>ff", '<Cmd>lua require("fzf-lua").files()<CR>', { desc = "Filetree (fzf-lua)" })
-vim.keymap.set("n", "<leader>fg", '<Cmd>lua require("fzf-lua").live_grep()<CR>', { desc = "Live grep (fzf-lua)" })
-vim.keymap.set("n", "<leader>fb", '<Cmd>lua require("fzf-lua").buffers()<CR>', { desc = "Buffers (fzf-lua)" })
-vim.keymap.set("n", "<leader>fh", '<Cmd>lua require("fzf-lua").help_tags()<CR>', { desc = "Help tags (fzf-lua)" })
-vim.keymap.set(
-	"n",
-	"<leader>fx",
-	'<Cmd>lua require("fzf-lua").diagnostics_document()<CR>',
-	{ desc = "Diagnostics in buffer (fzf-lua)" }
-)
-vim.keymap.set(
-	"n",
-	"<leader>fX",
-	'<Cmd>lua require("fzf-lua").diagnostics_workspace()<CR>',
-	{ desc = "Diagnostics in workspace (fzf-lua)" }
-)
-vim.keymap.set(
-	"n",
-	"<leader>fs",
-	'<Cmd>lua require("fzf-lua").lsp_document_symbols()<CR>',
-	{ desc = "Symbols in buffer (fzf-lua)" }
-)
--- }}}
--- {{{ which-key.nvim <- mini.icons
-vim.pack.add({
-	{ src = "https://github.com/folke/which-key.nvim" },
-})
-require("which-key").setup({
-	preset = "helix",
-	spec = {
-		{ "<leader>f", group = "fuzzy find" },
-		{ "<leader>b", group = "buffers" },
-		{ "<leader>g", group = "gitsigns actions" },
-		{ "<leader>g", mode = "v", group = "gitsigns actions" },
-		{ "<leader>t", group = "todo-comments" },
-		{ "<leader>r", group = "neovim" },
-	},
-})
-vim.keymap.set(
-	"n",
-	"<leader>?",
-	'<Cmd>lua require("which-key").show({ global = false })<CR>',
-	{ desc = "See keymaps local to current buffer (which-key)" }
-)
--- }}}
--- {{{ auto-session
-vim.pack.add({
-	{ src = "https://github.com/rmagatti/auto-session" },
-})
-vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
-require("auto-session").setup({
-	suppressed_dirs = { "~/", "~/Downloads", "/" },
-})
--- }}}
--- {{{ gitsigns.nvim
+-- {{{ gitsigns.nvim:                        git integration
 vim.pack.add({
 	{ src = "https://github.com/lewis6991/gitsigns.nvim" },
 })
 require("gitsigns").setup({
-	-- they should probably be global keybinds but whatever
 	on_attach = function(bufnr)
 		local gitsigns = require("gitsigns")
 
@@ -319,7 +255,7 @@ require("gitsigns").setup({
 			else
 				gitsigns.nav_hunk("next")
 			end
-		end, { desc = "Next hunk (gitsigns)" })
+		end, { desc = "Next hunk" })
 
 		map("n", "[c", function()
 			if vim.wo.diff then
@@ -327,199 +263,38 @@ require("gitsigns").setup({
 			else
 				gitsigns.nav_hunk("prev")
 			end
-		end, { desc = "Previous hunk (gitsigns)" })
+		end, { desc = "Previous hunk" })
 
 		-- Actions
-		map("n", "<leader>gs", gitsigns.stage_hunk, { desc = "Stage hunk (gitsigns)" })
-		map("n", "<leader>gr", gitsigns.reset_hunk, { desc = "Reset hunk (gitsigns)" })
+		map("n", "<leader>gs", gitsigns.stage_hunk, { desc = "Stage hunk" })
+		map("n", "<leader>gr", gitsigns.reset_hunk, { desc = "Reset hunk" })
 
 		map("v", "<leader>gs", function()
 			gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-		end, { desc = "Stage hunk (gitsigns)" })
+		end, { desc = "Stage hunk" })
 
 		map("v", "<leader>gr", function()
 			gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-		end, { desc = "Reset hunk (gitsigns)" })
+		end, { desc = "Reset hunk" })
 
-		map("n", "<leader>gS", gitsigns.stage_buffer, { desc = "Stage buffer (gitsigns)" })
-		map("n", "<leader>gR", gitsigns.reset_buffer, { desc = "Reset buffer (gitsigns)" })
-		map("n", "<leader>gp", gitsigns.preview_hunk, { desc = "Preview hunk (gitsigns)" })
-		map("n", "<leader>gi", gitsigns.preview_hunk_inline, { desc = "Preview hunk inline (gitsigns)" })
-
-		map("n", "<leader>gb", function()
-			gitsigns.blame_line({ full = true })
-		end, { desc = "Check full line blame (gitsigns)" })
-
-		map("n", "<leader>gd", gitsigns.diffthis, { desc = "Show diff of this buffer (gitsigns)" })
-
-		map("n", "<leader>gD", function()
-			gitsigns.diffthis("~")
-		end, { desc = "Show diff of this buffer w/ ~ (gitsigns)" })
-
-		map("n", "<leader>gQ", function()
-			gitsigns.setqflist("all")
-		end, { desc = "Set qflist w/ changes for whole repo (gitsigns)" })
-		map("n", "<leader>gq", gitsigns.setqflist, { desc = "Set qflist w/ changes (gitsigns)" })
-
-		-- Toggles
-		map("n", "<leader>gl", gitsigns.toggle_current_line_blame, { desc = "Toggle current line blame (gitsigns)" })
-		map("n", "<leader>gw", gitsigns.toggle_word_diff, { desc = "Toggle in-line word-diff (gitsigns)" })
-
-		-- Text object
-		map({ "o", "x" }, "ih", gitsigns.select_hunk, { desc = "Select hunk (gitsigns)" })
+		map("n", "<leader>gS", gitsigns.stage_buffer, { desc = "Stage buffer" })
+		map("n", "<leader>gR", gitsigns.reset_buffer, { desc = "Reset buffer" })
 	end,
 })
 -- }}}
--- {{{ vim-fugitive
+-- {{{ auto-session:                         automated session manager
 vim.pack.add({
-	{ src = "https://github.com/tpope/vim-fugitive" },
+	{ src = "https://github.com/rmagatti/auto-session" },
+})
+require("auto-session").setup({
+	suppressed_dirs = { "~/", "/" },
 })
 -- }}}
--- {{{ toggleterm.nvim <- nord.nvim
-vim.pack.add({
-	{
-		src = "https://github.com/akinsho/toggleterm.nvim",
-		version = "v2.13.1",
-	},
-})
-require("toggleterm").setup(require("nord.plugins.toggleterm").make_opts({
-	open_mapping = [[<c-t>]],
-}))
--- }}}
--- {{{ todo-comments.nvim <- plenary.nvim
-vim.pack.add({
-	{ src = "https://github.com/folke/todo-comments.nvim" },
-})
-require("todo-comments").setup({})
-vim.keymap.set("n", "<leader>ft", "<Cmd>TodoFzfLua<CR>", { desc = "Todo comments (fzf-lua / todo)" })
-vim.keymap.set("n", "<leader>tq", "<Cmd>TodoQuickFix<CR>", { desc = "Open todo comments in qflist (todo)" })
--- }}}
--- {{{ nvim-ufo <- promise-async
-vim.pack.add({
-	{ src = "https://github.com/kevinhwang91/nvim-ufo" },
-})
-vim.o.foldcolumn = "1"
-vim.o.foldlevel = 99
-vim.o.foldlevelstart = 99
-vim.o.foldenable = true
-vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:"
-vim.keymap.set("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
-vim.keymap.set("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
-require("ufo").setup({
-	provider_selector = function()
-		-- dont fallback to treesitter because it spews errors on "weird buffers"
-		-- such as the mini.files explorer
-		return { "lsp", "indent" }
-	end,
-})
--- }}}
-
--- {{{ nvim-treesitter
-vim.pack.add({
-	{
-		src = "https://github.com/nvim-treesitter/nvim-treesitter",
-		version = "main", -- Development happens on the main branch, not the default master branch
-	},
-})
--- NOTE: Adding support for a new language: add treesitter here
--- https://github.com/nvim-treesitter/nvim-treesitter/blob/main/SUPPORTED_LANGUAGES.md
-require("nvim-treesitter").install({
-	"bash",
-	"json",
-	"python",
-	"rust",
-	"squirrel",
-	"tmux",
-	"toml",
-	"yaml",
-	"zsh",
-})
-vim.api.nvim_create_autocmd("FileType", {
-	callback = function(ev)
-		pcall(vim.treesitter.start, ev.buf)
-	end,
-})
--- }}}
--- {{{ mason.nvim
-vim.pack.add({
-	{ src = "https://github.com/mason-org/mason.nvim" },
-})
-require("mason").setup()
--- }}}
--- {{{ mason-tool-installer.nvim <- mason.nvim
-vim.pack.add({
-	{ src = "https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim" },
-})
--- NOTE: Adding support for a new language: dont forget to add tools to this list
--- so that less stuff needs to be done when migrating
-require("mason-tool-installer").setup({
-	ensure_installed = {
-		"codelldb",
-		"lua-language-server",
-		"marksman",
-		"stylua",
-		-- pyright and black will be installed on a per-venv basis
-		"tex-fmt",
-	},
-})
--- }}}
--- {{{ nvim-lspconfig
--- See the quickstart configs at https://github.com/neovim/nvim-lspconfig/tree/master/lsp
-vim.pack.add({
-	{ src = "https://github.com/neovim/nvim-lspconfig" },
-})
--- }}}
--- {{{ conform.nvim
-vim.pack.add({
-	{ src = "https://github.com/stevearc/conform.nvim" },
-})
--- NOTE: Adding support for a new language: add formatters here
-require("conform").setup({
-	formatters_by_ft = {
-		lua = { "stylua" },
-		python = { "black" },
-		tex = { "tex-fmt" },
-	},
-	format_on_save = {
-		lsp_format = "fallback",
-		timeout_ms = 500,
-	},
-})
--- }}}
--- {{{ friendly-snippets
-vim.pack.add({
-	{ src = "https://github.com/rafamadriz/friendly-snippets" },
-})
--- }}}
--- {{{ mini.snippets <- friendly-snippets
-vim.pack.add({
-	{ src = "https://github.com/nvim-mini/mini.snippets" },
-})
--- Adjust language patterns
-local latex_patterns = { "latex/**/*.json", "**/latex.json" }
-local lang_patterns = {
-	tex = latex_patterns,
-	plaintex = latex_patterns,
-	-- Recognize special injected language of markdown tree-sitter parser
-	markdown_inline = { "markdown.json" },
-}
-local gen_loader = require("mini.snippets").gen_loader
-require("mini.snippets").setup({
-	snippets = {
-		-- Load custom file with global snippets first (adjust for Windows)
-		gen_loader.from_file("~/.config/nvim/snippets/global.json"),
-
-		-- Load snippets based on current language by reading files from
-		-- "snippets/" subdirectories from 'runtimepath' directories.
-		gen_loader.from_lang({ lang_patterns = lang_patterns }),
-	},
-})
--- }}}
--- {{{ blink.cmp
+-- {{{ blink.cmp:                            autocompletion
 vim.pack.add({
 	{
 		src = "https://github.com/saghen/blink.cmp",
-		version = "v1.8.0",
+		version = "v1.8.0", -- pin to a release to download prebuilt bins
 	},
 })
 require("blink.cmp").setup({
@@ -528,6 +303,9 @@ require("blink.cmp").setup({
 		-- remaps C-space to C-d because tmux's prefix is C-space
 		["<C-space>"] = false,
 		["<C-d>"] = { "show", "show_documentation", "hide_documentation" },
+		-- no more "i am using the arrow keys to navigate in insert mode can you please stop interrupting"
+		["<Up>"] = false,
+		["<Down>"] = false,
 	},
 	appearance = { nerd_font_variant = "normal" },
 	completion = { documentation = { auto_show = false } },
@@ -538,155 +316,99 @@ require("blink.cmp").setup({
 	fuzzy = { implementation = "prefer_rust_with_warning" },
 })
 -- }}}
-
--- {{{ nvim-dap
+-- {{{ tabout.nvim:                          tabout from pairs
 vim.pack.add({
-	{ src = "https://github.com/mfussenegger/nvim-dap" },
+	{ src = "https://github.com/abecodes/tabout.nvim" },
 })
--- the config for dap is below
--- }}}
--- {{{ nvim-dap-view <- nvim-dap
-vim.pack.add({
-	{ src = "https://github.com/igorlfs/nvim-dap-view" },
-})
-local dap, dapview = require("dap"), require("dap-view")
-vim.keymap.set("n", "<F8>", dap.continue, { desc = "Continue / start debugging" })
-vim.keymap.set("n", "<F4>", dap.toggle_breakpoint, { desc = "Toggle breakpoint" })
-vim.keymap.set("n", "<Left>", dap.step_out, { desc = "Step out" })
-vim.keymap.set("n", "<Down>", dap.step_over, { desc = "Step over" })
-vim.keymap.set("n", "<Right>", dap.step_into, { desc = "Step into" })
-vim.keymap.set("n", "<Up>", dap.restart_frame, { desc = "Restart frame" })
-vim.keymap.set("n", "<F3>", dapview.toggle, { desc = "Toggle dap-view" })
--- }}}
-
--- {{{ rustaceanvim
-vim.pack.add({
-	{
-		src = "https://github.com/mrcjkb/rustaceanvim",
-		version = "v6.9.7",
+require("tabout").setup({
+	tabkey = "<Tab>", -- key to trigger tabout, set to an empty string to disable
+	backwards_tabkey = "<S-Tab>", -- key to trigger backwards tabout, set to an empty string to disable
+	act_as_tab = true, -- shift content if tab out is not possible
+	act_as_shift_tab = false, -- reverse shift content if tab out is not possible (if your keyboard/terminal supports <S-Tab>)
+	default_tab = "<C-t>", -- shift default action (only at the beginning of a line, otherwise <TAB> is used)
+	default_shift_tab = "<C-d>", -- reverse shift default action,
+	enable_backwards = true, -- well ...
+	completion = true, -- if the tabkey is used in a completion pum
+	tabouts = {
+		{ open = "'", close = "'" },
+		{ open = '"', close = '"' },
+		{ open = "`", close = "`" },
+		{ open = "(", close = ")" },
+		{ open = "[", close = "]" },
+		{ open = "{", close = "}" },
+		{ open = "<", close = ">" },
+		{ open = ",", close = "," },
+		{ open = ";", close = ";" },
+		{ open = "=", close = "=" },
 	},
+	ignore_beginning = true, --[[ if the cursor is at the beginning of a filled element it will rather tab out than shift the content ]]
+	exclude = {}, -- tabout will ignore these filetypes
 })
 -- }}}
--- {{{ vimtex
+-- }}}
+
+-- {{{ treesitter
+-- ok yes, you can download and setup treesitters natively, but i've tried it and
+-- its a huge pain in the ass.
 vim.pack.add({
-	{ src = "https://github.com/lervag/vimtex" },
+	{ src = "https://github.com/nvim-treesitter/nvim-treesitter" },
 })
-vim.g.vimtex_view_method = "zathura"
--- }}}
--- {{{ render-markdown.nvim
-vim.pack.add({
-	{ src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
-})
--- }}}
-
--- {{{ wiki.vim
-vim.pack.add({
-	{ src = "https://github.com/lervag/wiki.vim" },
-})
-vim.g.wiki_root = "~/wiki"
--- }}}
--- }}}
-
--- {{{ lsp configs
--- merges both nvim-ufo and blink.cmp together
-local capabilities = {
-	textDocument = {
-		foldingRange = {
-			dynamicRegistration = false,
-			lineFoldingOnly = true,
-		},
-	},
-}
-capabilities = require("blink.cmp").get_lsp_capabilities(capabilities)
-
--- {{{ lua_ls
-vim.lsp.config("lua_ls", {
-	capabilities = capabilities,
-	on_init = function(client)
-		if client.workspace_folders then
-			local path = client.workspace_folders[1].name
-			if
-				path ~= vim.fn.stdpath("config")
-				and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
-			then
-				return
-			end
-		end
-
-		client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-			runtime = {
-				-- Tell the language server which version of Lua you're using (most
-				-- likely LuaJIT in the case of Neovim)
-				version = "LuaJIT",
-				-- Tell the language server how to find Lua modules same way as Neovim
-				-- (see `:h lua-module-load`)
-				path = {
-					"lua/?.lua",
-					"lua/?/init.lua",
-				},
-			},
-			-- Make the server aware of Neovim runtime files
-			workspace = {
-				checkThirdParty = false,
-				library = {
-					vim.env.VIMRUNTIME,
-					-- Depending on the usage, you might want to add additional paths
-					-- here.
-					-- '${3rd}/luv/library'
-					-- '${3rd}/busted/library'
-				},
-				-- Or pull in all of 'runtimepath'.
-				-- This is a lot slower and will cause issues when working on
-				-- your own configuration.
-				-- See https://github.com/neovim/nvim-lspconfig/issues/3189
-				-- library = {
-				--   vim.api.nvim_get_runtime_file('', true),
-				-- }
-			},
-		})
+-- i dont mind my lamb chops well done.
+require("nvim-treesitter").install({ "all" })
+-- automatically start treesitter if the filetype is supported
+vim.api.nvim_create_autocmd("FileType", {
+	callback = function()
+		-- there is still a chance that this will error so we wrap it in a pcall
+		pcall(vim.treesitter.start)
 	end,
-	settings = {
-		Lua = {},
+})
+-- }}}
+
+-- {{{ mason.nvim & mason-tool-installer.nvim
+vim.pack.add({
+	-- package manager for LSPs, DAPs, linters and formatters
+	-- mason might truly be necessary, because its just painless.
+	-- i tried setting up lua_ls manually but its a complete mess, see below.
+	{ src = "https://github.com/mason-org/mason.nvim" },
+	-- automatic installer for mason.nvim, for even better portability.
+	-- why isnt this default mason behaviour?
+	{ src = "https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim" },
+})
+require("mason").setup()
+require("mason-tool-installer").setup({
+	ensure_installed = {
+		-- exceptions:
+		--   pyright and black: per-venv basis
+		--   rust-analyzer: via rustup
+		"lua-language-server", -- only the mason build works, WTF?
+		"stylua",
 	},
 })
 -- }}}
 
--- NOTE: Adding support for a new language: enable lsp configs here
+-- {{{ LSP
 vim.lsp.enable({
 	"lua_ls",
-	-- rustaceanvim takes care of rust-analyzer already
-	"pyright",
-	"marksman",
+	"rust_analyzer",
 })
 -- }}}
 
--- {{{ utils
--- {{{ better diagnostics
-vim.diagnostic.config({
-	signs = {
-		text = {
-			[vim.diagnostic.severity.ERROR] = "󰅚 ",
-			[vim.diagnostic.severity.WARN] = "󰀪 ",
-			[vim.diagnostic.severity.INFO] = "󰋽 ",
-			[vim.diagnostic.severity.HINT] = "󰌶 ",
-		},
+-- {{{ format on write (conform.nvim)
+-- trust me, i wouldve implemented this behaviour natively if it didnt suck.
+-- on the other hand, conform just works with minimal config lines.
+vim.pack.add({
+	{ src = "https://github.com/stevearc/conform.nvim" },
+})
+require("conform").setup({
+	formatters_by_ft = {
+		lua = { "stylua" },
+		python = { "black" },
 	},
-	virtual_text = true,
-	underline = true,
+	format_on_save = {
+		lsp_format = "fallback",
+		timeout_ms = 500,
+	},
 })
--- }}}
--- {{{ highlight text on yank
-vim.api.nvim_create_autocmd("TextYankPost", {
-	group = vim.api.nvim_create_augroup("HighlightYank", {}),
-	pattern = "*",
-	callback = function()
-		vim.hl.on_yank({
-			higroup = "IncSearch",
-			timeout = 200,
-		})
-	end,
-})
--- }}}
 -- }}}
 
 -- vim: foldmethod=marker foldlevel=0
