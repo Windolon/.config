@@ -290,7 +290,7 @@ vim.pack.add({
 	{ src = "https://github.com/rmagatti/auto-session" },
 })
 require("auto-session").setup({
-	suppressed_dirs = { "~/", "/" },
+	suppressed_dirs = { "~/", "~/Downloads/", "/" },
 })
 -- }}}
 -- {{{ blink.cmp:                            autocompletion
